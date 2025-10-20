@@ -18,8 +18,11 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { SelectScrollable } from "@/components/company-select"
 import { ProductionChart } from "@/components/company-production"
+import { ExtractionChart } from "@/components/company-extraction"
+import { PlantationChart } from "@/components/company-area"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Globe } from "lucide-react"
+import { CompanyEarnings } from "./company-earnings"
 
 interface CompanyData {
     company_long_name: string
@@ -63,11 +66,11 @@ export function CompanyProfile() {
 
                             <CardDescription className="text-muted-foreground text-base">
                                 {companyData ? companyData.company_board : <Skeleton className="h-4 w-32 rounded-md" />}
-                                <p className="font-small">
+                                <div className="font-small">
                                     {companyData?.company_stock_code
                                         ? `${selectedCompany} (KLSE: ${companyData.company_stock_code})`
                                         : <Skeleton className="h-4 w-24 rounded-md inline-block" />}
-                                </p>
+                                </div>
                             </CardDescription>
 
                             {companyData?.company_website ? (
@@ -101,15 +104,33 @@ export function CompanyProfile() {
 
                     <Separator className="my-4 bg-zinc-700" />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        {[0, 1].map((i) => (
-                            <div key={i}>
-                                {companyData ? (
-                                    <ProductionChart companyShortName={selectedCompany} />
-                                ) : (
-                                    <Skeleton className="h-64 w-full rounded-md" />
-                                )}
+                        {companyData ? (
+                            <ProductionChart companyShortName={selectedCompany} />
+                        ) : (
+                            <Skeleton className="h-64 w-full rounded-md" />
+                        )}
+
+                        {companyData ? (
+                            <ExtractionChart companyShortName={selectedCompany} />
+                        ) : (
+                            <Skeleton className="h-64 w-full rounded-md" />
+                        )}
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        {companyData ? (
+                            <div className="md:col-span-1">
+                                <PlantationChart companyShortName={selectedCompany} />
                             </div>
-                        ))}
+                        ) : (
+                            <Skeleton className="h-64 w-full rounded-md md:col-span-1" />
+                        )}
+                        {companyData ? (
+                            <div className="md:col-span-2">
+                                <CompanyEarnings companyShortName={selectedCompany} />
+                            </div>
+                        ) : (
+                            <Skeleton className="h-64 w-full rounded-md md:col-span-2" />
+                        )}
                     </div>
                 </CardContent>
             </Card>

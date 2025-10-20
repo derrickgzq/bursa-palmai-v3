@@ -67,7 +67,10 @@ const stocks = [
 export function StockCarousel() {
   return (
     <div className="relative">
-      <Carousel className="w-full max-w-full">
+      <Carousel opts={{
+        align: "start",
+        loop: true,
+      }} className="w-full max-w-full">
         <CarouselContent className="-ml-2 md:-ml-4">
           {stocks.map((stock, index) => (
             <CarouselItem
@@ -88,9 +91,8 @@ export function StockCarousel() {
                   </div>
                   <Badge
                     variant="outline"
-                    className={`gap-1 ${
-                      stock.up ? "text-green-500" : "text-red-500"
-                    }`}
+                    className={`gap-1 ${stock.up ? "text-green-500" : "text-red-500"
+                      }`}
                   >
                     {stock.up ? (
                       <IconTrendingUp className="size-4" />

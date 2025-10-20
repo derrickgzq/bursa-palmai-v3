@@ -51,3 +51,43 @@ def get_company_production(company_short_name: str):
     df = pd.read_sql_query(query, conn, params=[company_short_name])
     conn.close()
     return df.to_dict(orient="records")
+
+@app.get("/api/extraction/{company_short_name}")
+def get_company_extraction_rate(company_short_name: str):
+    conn = sqlite3.connect(DB_PATH)
+    query = """
+        SELECT date, company_short_name, value, category
+        FROM company_extraction_rate
+        WHERE company_short_name = ?
+        ORDER BY date ASC
+    """
+    df = pd.read_sql_query(query, conn, params=[company_short_name])
+    conn.close()
+    return df.to_dict(orient="records")
+
+@app.get("/api/plantation-area/{company_short_name}")
+def get_company_plantation_area(company_short_name: str):
+    conn = sqlite3.connect(DB_PATH)
+    query = """
+        SELECT date, company_short_name, value, category
+        FROM company_plantation_area
+        WHERE company_short_name = ?
+        AND date = "2024"
+    """
+    df = pd.read_sql_query(query, conn, params=[company_short_name])
+    conn.close()
+    return df.to_dict(orient="records")
+
+@app.get("/api/earnings/{company_short_name}")
+def get_company_financials(company_short_name: str):
+    conn = sqlite3.connect(DB_PATH)
+    query = """
+        SELECT company_short_name, date, revenue, net_profit, net_profit_margin
+        FROM company_earnings_data
+        WHERE company_short_name = ?
+        AND date >= "2024-01-01"
+        ORDER BY date ASC
+    """
+    df = pd.read_sql_query(query, conn, params=[company_short_name])
+    conn.close()
+    return df.to_dict(orient="records")

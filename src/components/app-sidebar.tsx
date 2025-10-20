@@ -62,7 +62,12 @@ const data = {
       title: "Commodity Trends",
       url: "#",
       icon: TrendingUp,
-      items: [{ title: "Introduction", url: "#" }],
+      items: [
+        { title: "MPOB Statistics", url: "#" },
+        { title: "Soybean", url: "#" },
+        { title: "Diesel", url: "#" },
+        { title: "Fertilizers", url: "#" },
+      ],
     },
     {
       title: "Geography Insights",
