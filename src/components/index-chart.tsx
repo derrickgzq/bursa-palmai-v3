@@ -16,14 +16,26 @@ import {
 } from "@/components/ui/chart"
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
 
-const chartData = [
-    { month: "January", klci: 500, plantation: 4000 },
-    { month: "February", klci: 312, plantation: 7050 },
-    { month: "March", klci: 1498, plantation: 8100 },
-    { month: "April", klci: 2225, plantation: 1150 },
-    { month: "May", klci: 3030, plantation: 5200 },
-    { month: "June", klci: 5540, plantation: 7250 },
-]
+const chartData = Array.from({ length: 60 }, (_, i) => {
+  const day = i + 1
+  const dateLabel = `Day ${day}`
+
+  // Create high volatility by amplifying randomness
+  const klciBase = 15000
+  const plantationBase = 7000
+
+  // Randomize with strong daily swings (±80%)
+  const klci =
+    klciBase * (1 + (Math.random() - 0.5) * 1.6) // up/down 80%
+  const plantation =
+    plantationBase * (1 + (Math.random() - 0.5) * 1.6) // up/down 80%
+
+  return {
+    day: dateLabel,
+    klci: Math.round(klci),
+    plantation: Math.round(plantation),
+  }
+})
 
 const chartConfig = {
     klci: {

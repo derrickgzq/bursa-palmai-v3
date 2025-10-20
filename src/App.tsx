@@ -14,6 +14,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
+import { StockCarousel } from "@/components/stock-carousel"
 import { ThemeProvider } from "@/components/theme-provider"
 import { ModeToggle } from "@/components/mode-toggle"
 import { SectionCards } from "@/components/section-cards"
@@ -86,13 +87,28 @@ export default function Page() {
 
                 <SectionCards />
 
-                <h1 className="text-lg font-semibold mt-2 mb-1">Macros</h1>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[300px]">
-                  <CompanyTreemapCard />
-                  <IndexChart />
+                <div className="space-y-8">
+                  {/* Macros */}
+                  <section>
+                    <h1 className="text-lg font-semibold mt-2 mb-1">Macros</h1>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[300px]">
+                      <CompanyTreemapCard />
+                      <IndexChart />
+                    </div>
+                  </section>
+
+                  {/* Stock Prices */}
+                  <section>
+                    <h1 className="text-lg font-semibold mt-4 mb-1">Stock Prices</h1>
+                    <StockCarousel />
+                  </section>
+
+                  {/* News Headlines */}
+                  <section>
+                    <h1 className="text-lg font-semibold mt-4 mb-1">News Headlines</h1>
+                    <NewsCards />
+                  </section>
                 </div>
-                <h1 className="text-lg font-semibold mt-4 mb-1">News Headlines</h1>
-                <NewsCards />
               </>
             )}
 
