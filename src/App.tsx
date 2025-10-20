@@ -16,11 +16,13 @@ import {
 } from '@/components/ui/sidebar'
 import { StockCarousel } from "@/components/stock-carousel"
 import { ThemeProvider } from "@/components/theme-provider"
+import { SpinnerBadge } from "@/components/data-reload"
 import { ModeToggle } from "@/components/mode-toggle"
 import { SectionCards } from "@/components/section-cards"
 import { CompanyTreemapCard } from "@/components/market-cap"
 import { IndexChart } from "@/components/index-chart"
 import { NewsCards } from "@/components/news-card"
+import { CompanyProfile } from "@/components/company-profile"
 import { useState } from "react"
 
 export default function Page() {
@@ -56,7 +58,8 @@ export default function Page() {
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-4">
+              <SpinnerBadge />
               <ModeToggle />
             </div>
           </header>
@@ -90,7 +93,7 @@ export default function Page() {
                 <div className="space-y-8">
                   {/* Macros */}
                   <section>
-                    <h1 className="text-lg font-semibold mt-2 mb-1">Macros</h1>
+                    <h1 className="text-2xl font-semibold mt-2 mb-1">Macros</h1>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[300px]">
                       <CompanyTreemapCard />
                       <IndexChart />
@@ -99,13 +102,13 @@ export default function Page() {
 
                   {/* Stock Prices */}
                   <section>
-                    <h1 className="text-lg font-semibold mt-4 mb-1">Stock Prices</h1>
+                    <h1 className="text-2xl font-semibold mt-4 mb-1">Stock Prices</h1>
                     <StockCarousel />
                   </section>
 
                   {/* News Headlines */}
                   <section>
-                    <h1 className="text-lg font-semibold mt-4 mb-1">News Headlines</h1>
+                    <h1 className="text-2xl font-semibold mt-4 mb-1">News Headlines</h1>
                     <NewsCards />
                   </section>
                 </div>
@@ -113,10 +116,7 @@ export default function Page() {
             )}
 
             {activeTab === "Company Profiles" && (
-              <div className="p-4 border rounded-md">
-                <h1 className="text-lg font-semibold mb-2">Company Profiles</h1>
-                <p>Company summary, earnings, and insights go here.</p>
-              </div>
+              <CompanyProfile />
             )}
 
             {activeTab === "Commodity Trends" && (

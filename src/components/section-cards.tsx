@@ -1,4 +1,4 @@
-import { IconTrendingUp, IconTrendingDown, IconAlertTriangle } from "@tabler/icons-react"
+import { IconTrendingUp, IconTrendingDown } from "@tabler/icons-react"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -35,6 +35,7 @@ export function SectionCards() {
           </div>
         </CardFooter>
       </Card>
+
       {/* Price Momentum Card */}
       <Card className="@container/card">
         <CardHeader>
@@ -58,6 +59,7 @@ export function SectionCards() {
           </div>
         </CardFooter>
       </Card>
+
       {/* Weather Warnings Card */}
       <Card className="@container/card">
         <CardHeader>
@@ -67,18 +69,16 @@ export function SectionCards() {
           </CardTitle>
           <CardAction>
             <Badge variant="outline" className="gap-1">
-              <IconAlertTriangle className="size-4 text-yellow-600" />
+              <span className="pulse-icon"></span>
               Severe
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="flex gap-2 font-medium">
-            Flood risk in Johor <IconAlertTriangle className="size-4 text-yellow-600" />
+            Flood risk in Johor <span className="pulse-icon"></span>
           </div>
-          <div className="text-muted-foreground">
-            Updated 2 hours ago
-          </div>
+          <div className="text-muted-foreground">Updated 2 hours ago</div>
         </CardFooter>
       </Card>
     </div>

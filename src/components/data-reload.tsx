@@ -1,0 +1,14 @@
+import React from "react"
+import { Badge } from "@/components/ui/badge"
+import { Spinner } from "@/components/ui/spinner"
+
+export function SpinnerBadge() {
+  return (
+    <div className="flex items-center gap-2 [--radius:1.2rem]">
+      <Badge variant="secondary" className="flex items-center gap-1">
+        <Spinner className="w-4 h-4" />
+        Updating
+      </Badge>
+    </div>
+  )
+}

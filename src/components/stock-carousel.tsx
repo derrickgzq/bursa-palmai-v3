@@ -14,8 +14,8 @@ import { IconTrendingUp, IconTrendingDown } from "@tabler/icons-react"
 
 const stocks = [
   {
-    name: "IOI Corporation Berhad",
-    logo: "src/assets/images/ioi_logo.png",
+    name: "IOI Corporation",
+    logo: "src/assets/images/ioicorp_logo.png",
     price: "RM 4.36",
     change: "+1.2%",
     up: true,
@@ -53,6 +53,13 @@ const stocks = [
     logo: "src/assets/images/genp_logo.png",
     price: "RM 5.89",
     change: "+15.0%",
+    up: true,
+  },
+  {
+    name: "TSH Resources",
+    logo: "src/assets/images/tsh_logo.png",
+    price: "RM 1.09",
+    change: "+2.0%",
     up: true,
   },
 ]
