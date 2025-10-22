@@ -1,9 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime, timedelta, date
+from bs4 import BeautifulSoup
 import sqlite3
 import os
 import pandas as pd
 import psutil, os, time
+import re
+import requests
+import time
 
 app = FastAPI()
 
@@ -27,12 +32,90 @@ def get_memory_usage():
         "virtual_memory_mb": round(mem_info.vms / (1024 * 1024), 2)
     }
 
-@app.get("/api/company/{short_name}")
-def get_company(short_name: str):
+# news display
+@app.get("/api/news")
+def get_news():
+    def format_description(text: str) -> str:
+        # Replace "palmoil" with "palm oil"
+        text = re.sub(r'(?i)\bpalmoil\b', 'palm oil', text)
+
+        # Insert a space if words are glued: e.g. "palmOil" -> "palm Oil"
+        text = re.sub(r'(?i)(palm)([A-Z])', r'palm \2', text)
+        text = re.sub(r'(?i)(oil)([A-Z])', r'oil \2', text)
+
+        # Fix missing spaces like "...palmoilexports" -> "...palm oil exports"
+        text = re.sub(r'(?i)(palm)\s?(oil)', r'palm oil', text)
+
+        # Capitalize if "palm" starts a sentence
+        text = re.sub(r'(^|\.\s+)(palm)', lambda m: m.group(1) + "Palm", text, flags=re.IGNORECASE)
+
+        return text
+
+    def contains_relevant_keyword(text):
+        keywords = [
+            "palm oil", "oil palm", "fcpo", "plantation", 
+            "crude palm oil", "cpo", "kernel", "fresh fruit bunch",
+            "palm", "oilpalm", "palmoil"
+        ]
+        text_lower = text.lower()
+        return any(keyword in text_lower for keyword in keywords)
+
+    today_str = date.today().strftime("%Y-%m-%d")
+    offsets = [0, 10, 20, 30]  # Extend as needed
+    data = []
+
+    for offset in offsets:
+        url = f"https://theedgemalaysia.com/news-search-results?keywords=palm%20oil&to={today_str}&from=1999-01-01&language=english&offset={offset}"
+        response = requests.get(url)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        news_items = soup.find_all('div', class_='NewsList_newsListText__hstO7')
+
+        for item in news_items:
+            a_tag = item.find('a', href=True)
+            headline_tag = item.find('span', class_='NewsList_newsListItemHead__dg7eK')
+            description_tag = item.find('span', class_='NewsList_newsList__2fXyv')
+
+            parent = item.parent
+            date_tag = parent.find('div', class_='NewsList_infoNewsListSubMobile__SPmAG')
+            publish_date = date_tag.find('span').get_text(strip=True) if date_tag else None
+
+            img_tag = item.find_previous_sibling('div')
+            img_tag = img_tag.find('img', class_='NewsList_newsImage__j_h0a') if img_tag else None
+
+            if a_tag and headline_tag and description_tag:
+                headline = headline_tag.get_text(strip=True)
+
+                if not contains_relevant_keyword(headline):
+                    continue
+
+                link = a_tag['href']
+                if link.startswith('/'):
+                    link = f"https://theedgemalaysia.com{link}"
+
+                description = format_description(description_tag.get_text(strip=True))
+                image_url = img_tag['src'] if img_tag else None
+
+                #sentiment, score = analyze_sentiment(headline)
+
+                data.append({
+                    'headline': headline,
+                    'link': link,
+                    'description': description,
+                    'image_url': image_url,
+                    'published': publish_date
+                    #,
+                    #'sentiment': sentiment,
+                    #'score': round(score, 4)
+                })
+
+    return {"news": data}
+
+@app.get("/api/company/{company_short_name}")
+def get_company(company_short_name: str):
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    cur.execute("SELECT * FROM company_master_table WHERE company_short_name = ?", (short_name.upper(),))
+    cur.execute("SELECT * FROM company_master_table WHERE company_short_name = ?", (company_short_name.upper(),))
     row = cur.fetchone()
     conn.close()
 

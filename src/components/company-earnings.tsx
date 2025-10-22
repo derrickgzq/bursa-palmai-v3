@@ -53,7 +53,7 @@ export function CompanyEarnings({ companyShortName }: { companyShortName: string
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="text-xl">Company Financials</CardTitle>
+                <CardTitle className="text-xl">Quarterly Earnings</CardTitle>
                 <CardDescription>Revenue, Net Profit & Profit Margin</CardDescription>
             </CardHeader>
             <CardContent className="w-full">

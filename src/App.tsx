@@ -23,7 +23,6 @@ import { CompanyTreemapCard } from "@/components/market-cap"
 import { IndexChart } from "@/components/index-chart"
 import { NewsCards } from "@/components/news-card"
 import { CompanyProfile } from "@/components/company-profile"
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { GeographyMap } from "@/components/geography-map";
 import "leaflet/dist/leaflet.css";
 import { useState } from "react"
