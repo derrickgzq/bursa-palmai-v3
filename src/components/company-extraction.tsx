@@ -8,7 +8,6 @@ import {
     CardHeader,
     CardTitle,
     CardDescription,
-    CardFooter,
 } from "@/components/ui/card"
 import {
     ChartContainer,
@@ -16,7 +15,6 @@ import {
     ChartTooltipContent,
 } from "@/components/ui/chart"
 import { Skeleton } from "@/components/ui/skeleton"
-import { TrendingUp } from "lucide-react"
 
 export interface ExtractionData {
     date: string

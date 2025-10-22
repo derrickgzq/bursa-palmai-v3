@@ -23,6 +23,9 @@ import { CompanyTreemapCard } from "@/components/market-cap"
 import { IndexChart } from "@/components/index-chart"
 import { NewsCards } from "@/components/news-card"
 import { CompanyProfile } from "@/components/company-profile"
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { GeographyMap } from "@/components/geography-map";
+import "leaflet/dist/leaflet.css";
 import { useState } from "react"
 
 export default function Page() {
@@ -128,8 +131,7 @@ export default function Page() {
 
             {activeTab === "Geography Insights" && (
               <div className="p-4 border rounded-md">
-                <h1 className="text-lg font-semibold mb-2">Geography Insights</h1>
-                <p>Map, weather data, or regional analysis here.</p>
+                <GeographyMap />
               </div>
             )}
 

@@ -7,7 +7,6 @@ import {
   TrendingUp,
   Globe,
   ArrowLeftRight,
-  Palmtree,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"

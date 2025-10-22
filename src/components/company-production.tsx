@@ -66,7 +66,7 @@ export function ProductionChart({
     }
 
     return (
-        <Card className="bg-transparent border border-zinc-800 w-full">
+        <Card>
             <CardHeader>
                 <CardTitle className="text-xl">Monthly Production Data</CardTitle>
                 <CardDescription>Last 12 months by raw material</CardDescription>

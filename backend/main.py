@@ -3,21 +3,29 @@ from fastapi.middleware.cors import CORSMiddleware
 import sqlite3
 import os
 import pandas as pd
+import psutil, os, time
 
 app = FastAPI()
 
-# Allow frontend to call API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # or restrict to your React dev URL
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Dynamically find absolute path to DB
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "..", "src", "data", "bursa_palmai_database.db")
+
+@app.get("/api/memory")
+def get_memory_usage():
+    process = psutil.Process(os.getpid())
+    mem_info = process.memory_info()
+    return {
+        "memory_mb": round(mem_info.rss / (1024 * 1024), 2),
+        "virtual_memory_mb": round(mem_info.vms / (1024 * 1024), 2)
+    }
 
 @app.get("/api/company/{short_name}")
 def get_company(short_name: str):

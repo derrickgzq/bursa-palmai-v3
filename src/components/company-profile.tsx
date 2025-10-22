@@ -1,12 +1,6 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
-import {
-    ChartContainer,
-    ChartTooltip,
-    ChartTooltipContent,
-} from "@/components/ui/chart"
 import {
     Card,
     CardHeader,
@@ -47,7 +41,7 @@ export function CompanyProfile() {
 
     return (
         <div className="grid auto-rows-min gap-4 md:grid-cols-1 w-full">
-            <Card className="@container/card w-full bg-card text-card-foreground border border-zinc-800 shadow-md">
+            <Card>
                 <CardHeader className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-4 pb-4 border-b border-zinc-700">
                     {/* Left section */}
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">

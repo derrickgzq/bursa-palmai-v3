@@ -51,7 +51,7 @@ export function CompanyEarnings({ companyShortName }: { companyShortName: string
     }
 
     return (
-        <Card className="bg-transparent border border-zinc-800 w-full">
+        <Card>
             <CardHeader>
                 <CardTitle className="text-xl">Company Financials</CardTitle>
                 <CardDescription>Revenue, Net Profit & Profit Margin</CardDescription>
