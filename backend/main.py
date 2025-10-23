@@ -76,8 +76,12 @@ def get_news():
             description_tag = item.find('span', class_='NewsList_newsList__2fXyv')
 
             parent = item.parent
-            date_tag = parent.find('div', class_='NewsList_infoNewsListSubMobile__SPmAG')
-            publish_date = date_tag.find('span').get_text(strip=True) if date_tag else None
+            date_tag = parent.find('div', class_='NewsList_infoNewsListSubMobile__SPmAG') # type: ignore
+            publish_date = None
+            if date_tag is not None:
+                span = date_tag.find('span')
+                if span is not None:
+                    publish_date = span.get_text(strip=True)
 
             img_tag = item.find_previous_sibling('div')
             img_tag = img_tag.find('img', class_='NewsList_newsImage__j_h0a') if img_tag else None
@@ -88,7 +92,7 @@ def get_news():
                 if not contains_relevant_keyword(headline):
                     continue
 
-                link = a_tag['href']
+                link = str(a_tag['href'])
                 if link.startswith('/'):
                     link = f"https://theedgemalaysia.com{link}"
 
