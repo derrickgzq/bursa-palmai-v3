@@ -16,7 +16,6 @@ import {
 } from '@/components/ui/sidebar'
 import { StockCarousel } from "@/components/stock-carousel"
 import { ThemeProvider } from "@/components/theme-provider"
-import { SpinnerBadge } from "@/components/data-reload"
 import { ModeToggle } from "@/components/mode-toggle"
 import { SectionCards } from "@/components/section-cards"
 import { CompanyTreemapCard } from "@/components/market-cap"
@@ -61,7 +60,6 @@ export default function Page() {
               </BreadcrumbList>
             </Breadcrumb>
             <div className="ml-auto flex items-center gap-4">
-              <SpinnerBadge />
               <ModeToggle />
             </div>
           </header>

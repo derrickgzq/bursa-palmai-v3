@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, LabelList } from "recharts"
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, LabelList, Legend } from "recharts"
 import {
     Card,
     CardContent,
@@ -88,6 +88,7 @@ export function ExtractionChart({ companyShortName }: CompanyExtractionProps) {
                             cursor={false}
                             content={<ChartTooltipContent indicator="line" />}
                         />
+                        <Legend />
                         {categories.map((cat, idx) => (
                             <Line
                                 key={cat}

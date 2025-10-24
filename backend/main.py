@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timedelta, date
 from bs4 import BeautifulSoup
+from typing import Dict, Any
+import yfinance as yf
 import sqlite3
 import os
 import pandas as pd
@@ -133,6 +135,34 @@ def get_company(company_short_name: str):
         }
     return {"error": "Company not found"}
 
+@app.get("/api/shareprice/{company_short_name}")
+def get_company_price_data(company_short_name: str):
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    cur.execute("SELECT company_stock_code FROM company_master_table WHERE company_short_name = ?", (company_short_name.upper(),))
+    row = cur.fetchone()
+    conn.close()
+
+    if not row:
+        return {"error": f"Company '{company_short_name}' not found in database."}
+
+    stock_code = f"{row['company_stock_code']}.KL"
+
+    end = datetime.today()
+    start = end - timedelta(days=30)
+    data = yf.download(stock_code, start=start, end=end)
+
+    if data.empty: #type: ignore
+        return {"error": f"No data found for stock code {stock_code}"}
+
+    if isinstance(data.columns, pd.MultiIndex): #type: ignore
+        data.columns = data.columns.droplevel(1) #type: ignore
+
+    dates = list(data.index.strftime('%Y-%m-%d')) #type: ignore
+    prices = [round(p, 2) for p in data['Close'].tolist()]  # type: ignore
+    return {"dates": dates, "prices": prices}
+
 @app.get("/api/production/{company_short_name}")
 def get_company_production(company_short_name: str):
     conn = sqlite3.connect(DB_PATH)
@@ -186,3 +216,48 @@ def get_company_financials(company_short_name: str):
     df = pd.read_sql_query(query, conn, params=[company_short_name])
     conn.close()
     return df.to_dict(orient="records")
+
+@app.get("/api/company/sankey/{company_short_name}")
+def get_company_sankey(company_short_name: str) -> Dict[str, Any]:
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT date, source, target, value
+        FROM company_financials_data
+        WHERE company_short_name = ?
+        ORDER BY date DESC
+        LIMIT 100
+    """, (company_short_name.upper(),))
+    rows = cur.fetchall()
+    conn.close()
+
+    if not rows:
+        return {"nodes": [], "links": []}
+
+    # Collect unique node names
+    node_names = set()
+    for r in rows:
+        node_names.add(r["source"])
+        node_names.add(r["target"])
+
+    # Create node list
+    node_list = sorted(list(node_names))  # sorted for consistent order
+    node_index = {name: i for i, name in enumerate(node_list)}
+
+    # Build links array
+    links = []
+    for r in rows:
+        source_idx = node_index[r["source"]]
+        target_idx = node_index[r["target"]]
+        links.append({
+            "source": source_idx,
+            "target": target_idx,
+            "value": float(r["value"])  # ensure numeric
+        })
+
+    return {
+        "nodes": [{"name": name} for name in node_list],
+        "links": links
+    }
