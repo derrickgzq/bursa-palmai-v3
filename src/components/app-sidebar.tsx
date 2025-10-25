@@ -7,6 +7,7 @@ import {
   TrendingUp,
   Globe,
   ArrowLeftRight,
+  BookOpenText
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -85,6 +86,15 @@ const data = {
       items: [
         { title: "Network Graph", url: "#" },
         { title: "Export & Imports", url: "#" },
+      ],
+    },
+    {
+      title: "Documentation",
+      url: "#",
+      icon: BookOpenText,
+      items: [
+        { title: "Getting Started", url: "#" },
+        { title: "API Reference", url: "#" },
       ],
     },
   ],

@@ -368,6 +368,7 @@ def get_mspo_certified_entities():
             "company" AS company_name,
             "parent_company" AS parent_company,
             "entity" AS entity,
+            "mpobl_license_number" AS mpobl_license_number,
             "category" AS category,
             "latitude" AS latitude,
             "longitude" AS longitude,
@@ -416,14 +417,12 @@ def get_mspo_certified_entities():
     def classify_wind_risk(speed):
         if pd.isna(speed):
             return "unknown"
-        elif speed < 4:
+        elif speed < 5:
             return "low"
-        elif 4 <= speed < 8:
-            return "moderate"
-        elif 8 <= speed < 12:
-            return "strong"
+        elif 5 <= speed < 10:
+            return "medium"
         else:
-            return "dangerous"
+            return "high"
 
     mspo_gdf["wind_risk"] = mspo_gdf["mean_wind_speed_10m"].apply(classify_wind_risk)
 
@@ -454,7 +453,7 @@ def get_mspo_certified_entities():
 
     # 8️⃣ Final cleanup
     mspo_forecast = mspo_forecast[
-        ['company_name', 'parent_company', 'entity', 'category', 'latitude', 'longitude',
+        ['company_name', 'parent_company', 'entity', 'mpobl_license_number', 'category', 'latitude', 'longitude',
          'certified_area', 'planted_area', 'certified_area_pct',
          'nearest_station', 'distance_km', 'summary_forecast', 'color',
          'min_temp', 'max_temp', 'mean_wind_speed_10m', 'wind_risk', 'date']
