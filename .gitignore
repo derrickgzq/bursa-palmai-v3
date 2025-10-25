@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Big shapefiles/other files
+src/data/rspo_oil_palm/
+src/data/MYS_wind-speed_10m.tif

@@ -1,8 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from functools import lru_cache
 from datetime import datetime, timedelta, date
 from bs4 import BeautifulSoup
-from typing import Dict, Any
+from typing import Dict, Any, List
+from geopy.distance import geodesic
+from rasterio import open as rio_open
+from rasterio.warp import transform
 import yfinance as yf
 import sqlite3
 import os
@@ -11,6 +15,8 @@ import psutil, os, time
 import re
 import requests
 import time
+import geopandas as gpd
+import numpy as np
 
 app = FastAPI()
 
@@ -24,6 +30,11 @@ app.add_middleware(
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "..", "src", "data", "bursa_palmai_database.db")
+DATA_PATH = os.path.join(BASE_DIR, "..", "src", "data", "weather_station_base.csv")
+WIND_PATH = os.path.join(BASE_DIR, "..", "src", "data", "MYS_wind-speed_10m.tif")
+WEATHER_FORECAST_API_URL = "https://api.data.gov.my/weather/forecast"
+
+pd.set_option('future.no_silent_downcasting', True)
 
 @app.get("/api/memory")
 def get_memory_usage():
@@ -34,7 +45,6 @@ def get_memory_usage():
         "virtual_memory_mb": round(mem_info.vms / (1024 * 1024), 2)
     }
 
-# news display
 @app.get("/api/news")
 def get_news():
     def format_description(text: str) -> str:
@@ -261,3 +271,196 @@ def get_company_sankey(company_short_name: str) -> Dict[str, Any]:
         "nodes": [{"name": name} for name in node_list],
         "links": links
     }
+
+@lru_cache(maxsize=1)
+def load_weather_data():
+    print("♻️ Loading and processing weather forecast data...")
+
+    # 1️⃣ Fetch API
+    response = requests.get(WEATHER_FORECAST_API_URL)
+    wfcast_json = response.json()
+    wfcast_df = pd.json_normalize(wfcast_json)
+
+    wfcast_df = wfcast_df[['date', 'summary_forecast', 'min_temp', 'max_temp', 'location.location_name']]
+    wfcast_df.rename(columns={'location.location_name': 'location_name'}, inplace=True)
+    wfcast_df['date'] = pd.to_datetime(wfcast_df['date'])
+    
+
+    def assign_color(summary):
+        text = str(summary).lower().strip()
+
+        if any(word in text for word in ["tiada hujan", "no rain", "cerah", "clear"]):
+            return "green"
+        elif any(word in text for word in ["ribut petir", "thunderstorm"]):
+            return "red"
+        elif any(word in text for word in ["hujan", "rain"]):
+            return "orange"
+        elif any(word in text for word in ["berangin", "windy"]):
+            return "yellow"
+        elif any(word in text for word in ["berjerebu", "hazy", "jerebu"]):
+            return "grey"
+        else:
+            return "grey"
+
+    wfcast_df["color"] = wfcast_df["summary_forecast"].apply(assign_color)
+
+    # 2️⃣ Load station base (local CSV)
+    points_df = pd.read_csv(DATA_PATH)
+
+    # 3️⃣ Merge weather + coordinates
+    weather_df = wfcast_df.merge(points_df, on='location_name', how='left')
+    weather_gdf = gpd.GeoDataFrame(
+        weather_df,
+        geometry=gpd.points_from_xy(weather_df.base_longitude, weather_df.base_latitude),
+        crs="EPSG:4326"
+    )
+
+    # 4️⃣ Prepare distinct station geometry
+    station_points = weather_gdf[['location_name', 'base_longitude', 'base_latitude']].drop_duplicates()
+    station_points['geometry'] = gpd.points_from_xy(
+        station_points['base_longitude'],
+        station_points['base_latitude']
+    )
+    station_gdf = gpd.GeoDataFrame(station_points, geometry='geometry', crs='EPSG:4326')
+
+    print("✅ Weather forecast cached successfully.")
+    return weather_gdf, station_gdf
+
+@lru_cache(maxsize=1)
+def load_wind_data():
+    print("🌬️ Loading Malaysia wind speed raster (10m height)...")
+
+    try:
+        dataset = rio_open(WIND_PATH)
+        print("✅ Wind speed raster loaded.")
+        return dataset
+    except Exception as e:
+        print("❌ Failed to load wind raster:", e)
+        return None
+    
+def get_wind_speed(lat, lon, dataset):
+    try:
+        if dataset is None:
+            return np.nan
+        # Transform lat/lon to dataset CRS
+        coords = [(lon, lat)]
+        transformed_coords = transform('EPSG:4326', dataset.crs, [lon], [lat])
+        # Read raster value at this location
+        for val in dataset.sample(zip(*transformed_coords)):
+            return float(val[0]) if val[0] != dataset.nodata else np.nan
+    except Exception:
+        return np.nan
+
+# ----------------------------------------------------------
+# 🌴 Endpoint — Get MSPO Certified Entities (Pahang)
+# ----------------------------------------------------------
+@app.get("/api/mspo-certified-entities")
+def get_mspo_certified_entities():
+    print("🔍 Fetching MSPO certified entities...")
+
+    # 1️⃣ Load weather data (cached)
+    weather_gdf, station_gdf = load_weather_data()
+
+    # 2️⃣ Load MSPO entities
+    conn = sqlite3.connect(DB_PATH)
+    mspo_df = pd.read_sql_query("""
+        SELECT
+            "company" AS company_name,
+            "parent_company" AS parent_company,
+            "entity" AS entity,
+            "category" AS category,
+            "latitude" AS latitude,
+            "longitude" AS longitude,
+            "certified_area_ha" AS certified_area,
+            "planted_area_ha" AS planted_area
+        FROM mspo_certified_entities
+        WHERE status = 'ACTIVE'
+            AND category = 'ESTATE'
+            AND (state = "Pahang"
+                 OR state = "Kedah")
+            AND "latitude" IS NOT NULL
+            AND "longitude" IS NOT NULL
+    """, conn)
+    conn.close()
+
+    # 3️⃣ Clean numeric columns
+    for col in ['certified_area', 'planted_area']:
+        mspo_df[col] = pd.to_numeric(
+            mspo_df[col].replace(['', ' ', '-', None, 'NA', 'N/A'], np.nan), #type: ignore
+            errors='coerce'
+        )
+
+    # 4️⃣ Add percentage safely
+    mspo_df['certified_area_pct'] = (
+        mspo_df['certified_area'] /
+        mspo_df['planted_area'].replace(0, np.nan)
+    ) * 100
+    mspo_df = mspo_df.dropna(subset=['certified_area_pct'])
+    mspo_df['certified_area_pct'] = mspo_df['certified_area_pct'].round(2)
+
+    # 5️⃣ Convert to GeoDataFrame
+    mspo_gdf = gpd.GeoDataFrame(
+        mspo_df,
+        geometry=gpd.points_from_xy(mspo_df.longitude, mspo_df.latitude),
+        crs="EPSG:4326"
+    )
+
+    # 5.1️⃣ Load wind dataset
+    wind_dataset = load_wind_data()
+
+    # 5.2️⃣ Extract wind speed for each plantation
+    mspo_gdf["mean_wind_speed_10m"] = mspo_gdf.apply(
+        lambda row: get_wind_speed(row.latitude, row.longitude, wind_dataset), axis=1
+    )
+
+    def classify_wind_risk(speed):
+        if pd.isna(speed):
+            return "unknown"
+        elif speed < 4:
+            return "low"
+        elif 4 <= speed < 8:
+            return "moderate"
+        elif 8 <= speed < 12:
+            return "strong"
+        else:
+            return "dangerous"
+
+    mspo_gdf["wind_risk"] = mspo_gdf["mean_wind_speed_10m"].apply(classify_wind_risk)
+
+    # 6️⃣ Find nearest station
+    def get_nearest_station(row):
+        plantation_point = (row['latitude'], row['longitude'])
+        distances = station_gdf.apply(
+            lambda x: geodesic(plantation_point, (x.base_latitude, x.base_longitude)).km,
+            axis=1
+        )
+        idx = distances.idxmin()
+        nearest = station_gdf.loc[idx]
+        return pd.Series({
+            'nearest_station': nearest.location_name,
+            'distance_km': round(distances[idx], 2)
+        })
+
+    mspo_gdf[['nearest_station', 'distance_km']] = mspo_gdf.apply(get_nearest_station, axis=1)
+
+    # 7️⃣ Merge weather forecast
+    mspo_forecast = pd.merge(
+        mspo_gdf,
+        weather_gdf,
+        left_on='nearest_station',
+        right_on='location_name',
+        how='left'
+    )
+
+    # 8️⃣ Final cleanup
+    mspo_forecast = mspo_forecast[
+        ['company_name', 'parent_company', 'entity', 'category', 'latitude', 'longitude',
+         'certified_area', 'planted_area', 'certified_area_pct',
+         'nearest_station', 'distance_km', 'summary_forecast', 'color',
+         'min_temp', 'max_temp', 'mean_wind_speed_10m', 'wind_risk', 'date']
+    ].drop_duplicates()
+
+    # 9️⃣ Return JSON
+    result = mspo_forecast.to_dict(orient="records")
+    print(f"✅ Returned {len(result)} plantation records.")
+    return {"data": result}

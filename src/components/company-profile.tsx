@@ -153,7 +153,7 @@ export function CompanyProfile() {
                     </ToggleGroup>
                 </div>
 
-                <div className="w-full h-[360px]">
+                <div>
                     {companyData ? (
                         activeView === "earnings" ? (
                             <CompanyEarnings companyShortName={selectedCompany} />

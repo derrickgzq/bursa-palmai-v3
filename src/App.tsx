@@ -128,7 +128,10 @@ export default function Page() {
 
             {activeTab === "Geography Insights" && (
               <div className="p-4 border rounded-md">
-                <GeographyMap />
+                <h1 className="text-2xl font-semibold mt-2 mb-1">Palm Oil Geography</h1>
+                <div>
+                  <GeographyMap />
+                </div>
               </div>
             )}
 

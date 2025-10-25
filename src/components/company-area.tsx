@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useEffect, useState, useMemo } from "react"
-import { PieChart, Pie, Sector, Label, Legend } from "recharts"
+import { useEffect, useState, useMemo } from "react"
+import { PieChart, Pie, Sector, Label } from "recharts"
 import type { PieSectorDataItem } from "recharts/types/polar/Pie"
 
 import {
