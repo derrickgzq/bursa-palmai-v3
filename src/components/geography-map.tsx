@@ -11,6 +11,8 @@ import { PieChart, Pie, Label, Legend, Tooltip } from "recharts";
 import { ChartContainer } from "@/components/ui/chart";
 import { Progress } from "@/components/ui/progress";
 import { Home, Factory, Sun, CloudRain, CloudLightning, Wind, Haze, Waves, Droplets } from "lucide-react";
+import { WiEarthquake } from 'react-icons/wi';
+import { BsThermometerSun } from 'react-icons/bs';
 
 interface Plantation {
   company_name: string;
@@ -30,6 +32,10 @@ interface Plantation {
   max_temp: number;
   mean_wind_speed_10m: number;
   wind_risk: string;
+  earthquake_availability: string;
+  earthquake_origin: string;
+  earthquake_magnitude: number;
+  earthquake_origin_distance_km: number;
   date: string;
 }
 
@@ -305,12 +311,48 @@ export function GeographyMap() {
 
               {/* Drought Risk */}
               <div className="flex items-center gap-4">
-                <Sun className="h-12 w-12 flex-shrink-0 text-foreground" />
+                <BsThermometerSun className="h-12 w-12 flex-shrink-0 text-foreground" />
                 <div className="flex flex-col gap-1">
                   <div className="text-base font-medium">Low</div>
                   <div className="text-xs text-muted-foreground">Drought Risk</div>
                 </div>
               </div>
+            </div>
+            {/* Earthquake Section */}
+            <div className="mb-4">
+              <h2 className="text-sm font-semibold text-muted-foreground mb-2">Earthquake</h2>
+
+              {selectedCompanyForDate?.earthquake_availability === "Earthquake within 300km radius" ? (
+                <div className="flex items-center gap-4">
+                  <WiEarthquake
+                    className={`h-12 w-12 flex-shrink-0 ${selectedCompanyForDate?.earthquake_magnitude >= 6
+                        ? "text-red-500"
+                        : selectedCompanyForDate?.earthquake_magnitude >= 5
+                          ? "text-orange-500"
+                          : "text-yellow-500"
+                      }`}
+                  />
+                  <div className="flex flex-col gap-1">
+                    <div className="text-base font-medium">
+                      Magnitude {selectedCompanyForDate?.earthquake_magnitude}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Origin: {selectedCompanyForDate?.earthquake_origin}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Distance: {selectedCompanyForDate?.earthquake_origin_distance_km?.toFixed(1)} km
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-4">
+                  <WiEarthquake className="h-12 w-12 flex-shrink-0 text-gray-400" />
+                  <div className="flex flex-col gap-1">
+                    <div className="text-base font-medium">No recent earthquake nearby</div>
+                    <div className="text-xs text-muted-foreground">All clear in this area</div>
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

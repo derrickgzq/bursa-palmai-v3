@@ -33,6 +33,7 @@ DB_PATH = os.path.join(BASE_DIR, "..", "src", "data", "bursa_palmai_database.db"
 DATA_PATH = os.path.join(BASE_DIR, "..", "src", "data", "weather_station_base.csv")
 WIND_PATH = os.path.join(BASE_DIR, "..", "src", "data", "MYS_wind-speed_10m.tif")
 WEATHER_FORECAST_API_URL = "https://api.data.gov.my/weather/forecast"
+EARTHQUAKE_API_URL = "https://api.data.gov.my/weather/warning/earthquake/"
 
 pd.set_option('future.no_silent_downcasting', True)
 
@@ -338,6 +339,35 @@ def load_wind_data():
         print("❌ Failed to load wind raster:", e)
         return None
     
+@lru_cache(maxsize=1)
+def fetch_earthquake_data():
+    """
+    Fetch and cache Malaysia earthquake data for reuse across endpoints.
+    Cached for 1 hour or until server restarts.
+    """
+    print("🌍 Fetching Malaysia earthquake data...")
+    try:
+        resp = requests.get(EARTHQUAKE_API_URL, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+
+        if not data:
+            print("⚠️ No earthquake data returned.")
+            return pd.DataFrame(columns=["lat", "lon", "location", "magdefault"])
+
+        # Sort by 'utcdatetime' to ensure latest comes first
+        df = pd.json_normalize(data)
+        df["utcdatetime"] = pd.to_datetime(df["utcdatetime"], errors="coerce")
+        df = df.sort_values("utcdatetime", ascending=False).head(1)
+
+        df = df[["lat", "lon", "location", "magdefault"]].dropna()
+        print(f"✅ Latest earthquake: {df.iloc[0]['location']} (M{df.iloc[0]['magdefault']})")
+        return df.reset_index(drop=True)
+
+    except Exception as e:
+        print("❌ Failed to fetch earthquake data:", e)
+        return pd.DataFrame(columns=["lat", "lon", "location", "magdefault"])
+    
 def get_wind_speed(lat, lon, dataset):
     try:
         if dataset is None:
@@ -414,6 +444,40 @@ def get_mspo_certified_entities():
         lambda row: get_wind_speed(row.latitude, row.longitude, wind_dataset), axis=1
     )
 
+        # 5.3️⃣ Fetch latest earthquake data
+    eq_df = fetch_earthquake_data()
+
+    # 5.4️⃣ Compute nearest earthquake for each plantation
+    def nearest_earthquake(row):
+        if eq_df.empty:
+            return pd.Series({
+                "earthquake_availability": "no",
+                "earthquake_origin": None,
+                "earthquake_magnitude": None,
+                "earthquake_origin_distance_km": None
+            })
+
+        distances = eq_df.apply(
+            lambda eq: geodesic((row.latitude, row.longitude), (eq.lat, eq.lon)).km,
+            axis=1
+        )
+
+        idx = distances.idxmin()
+        nearest_eq = eq_df.loc[idx]
+        min_dist = distances[idx]
+
+        availability = "Earthquake within 300km radius" if min_dist <= 300 else "No earthquake within 300km radius"
+
+        return pd.Series({
+            "earthquake_availability": availability,
+            "earthquake_origin": nearest_eq["location"],
+            "earthquake_magnitude": nearest_eq["magdefault"],
+            "earthquake_origin_distance_km": round(min_dist, 2)
+        })
+
+    # Apply to all MSPO points
+    mspo_gdf = pd.concat([mspo_gdf, mspo_gdf.apply(nearest_earthquake, axis=1)], axis=1)
+
     def classify_wind_risk(speed):
         if pd.isna(speed):
             return "unknown"
@@ -456,7 +520,8 @@ def get_mspo_certified_entities():
         ['company_name', 'parent_company', 'entity', 'mpobl_license_number', 'category', 'latitude', 'longitude',
          'certified_area', 'planted_area', 'certified_area_pct',
          'nearest_station', 'distance_km', 'summary_forecast', 'color',
-         'min_temp', 'max_temp', 'mean_wind_speed_10m', 'wind_risk', 'date']
+         'min_temp', 'max_temp', 'mean_wind_speed_10m', 'wind_risk', 
+         'earthquake_availability', 'earthquake_origin', 'earthquake_magnitude', 'earthquake_origin_distance_km', 'date']
     ].drop_duplicates()
 
     # 9️⃣ Return JSON
