@@ -23,6 +23,7 @@ import { IndexChart } from "@/components/index-chart"
 import { NewsCards } from "@/components/news-card"
 import { CompanyProfile } from "@/components/company-profile"
 import { GeographyMap } from "@/components/geography-map";
+import { CommodityTrend } from "@/components/commodity-trend";
 import "leaflet/dist/leaflet.css";
 import { useState } from "react"
 
@@ -120,15 +121,15 @@ export default function Page() {
             )}
 
             {activeTab === "Commodity Trends" && (
-              <div className="p-4 border rounded-md">
-                <h1 className="text-lg font-semibold mb-2">Commodity Trends</h1>
-                <p>Show commodity price charts, trends, and insights here.</p>
-              </div>
+                <CommodityTrend />
             )}
 
             {activeTab === "Geography Insights" && (
               <div className="p-4 border rounded-md">
-                <h1 className="text-2xl font-semibold mt-2 mb-1">Palm Oil Geography</h1>
+                <h1 className="text-2xl font-semibold mt-2 mb-0.5">Palm Oil Geography</h1>
+                <p className="text-stone-800 dark:text-stone-400 text-sm mb-2">
+                  Navigate MSPO-certified entities in Malaysia with weather forecasts, geological and aqueduct risks.
+                </p>
                 <div>
                   <GeographyMap />
                 </div>

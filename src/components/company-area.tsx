@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useMemo } from "react"
-import { PieChart, Pie, Sector, Label } from "recharts"
+import { PieChart, Pie, Sector, Label, Legend } from "recharts"
 import type { PieSectorDataItem } from "recharts/types/polar/Pie"
 
 import {
@@ -83,6 +83,7 @@ export function PlantationChart({ companyShortName }: CompanyAreaPieProps) {
               )}
               onMouseEnter={onPieEnter}
             >
+              <Legend></Legend>
               <Label
                 content={({ viewBox }) => {
                   if (!viewBox || !("cx" in viewBox) || !("cy" in viewBox)) return null

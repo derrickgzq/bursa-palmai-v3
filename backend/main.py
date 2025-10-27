@@ -143,6 +143,7 @@ def get_company(company_short_name: str):
             "company_board": row[3],
             "company_description": row[4],
             "company_website": row[5],
+            "company_rolename": row[6]
         }
     return {"error": "Company not found"}
 
@@ -273,6 +274,36 @@ def get_company_sankey(company_short_name: str) -> Dict[str, Any]:
         "links": links
     }
 
+@app.get("/api/mpob-statistics")
+def get_mpob_statistics():
+    six_months_ago = (datetime.now() - timedelta(days=180)).strftime("%Y-%m-%d")
+    
+    conn = sqlite3.connect(DB_PATH)
+    query = """
+        SELECT date, category, value
+        FROM mpob_stats
+        WHERE date >= ?
+        ORDER BY date ASC
+    """
+    df = pd.read_sql_query(query, conn, params=(six_months_ago,))
+    conn.close()
+    return df.to_dict(orient="records")
+
+@app.get("/api/raw-material-prices")
+def get_raw_material_prices():
+    six_months_ago = (datetime.now() - timedelta(days=180)).strftime("%Y-%m-%d")
+    
+    conn = sqlite3.connect(DB_PATH)
+    query = """
+        SELECT date, category, value
+        FROM commodities_data
+        WHERE date >= ?
+        ORDER BY date ASC
+    """
+    df = pd.read_sql_query(query, conn, params=(six_months_ago,))
+    conn.close()
+    return df.to_dict(orient="records")
+
 @lru_cache(maxsize=1)
 def load_weather_data():
     print("♻️ Loading and processing weather forecast data...")
@@ -381,9 +412,6 @@ def get_wind_speed(lat, lon, dataset):
     except Exception:
         return np.nan
 
-# ----------------------------------------------------------
-# 🌴 Endpoint — Get MSPO Certified Entities (Pahang)
-# ----------------------------------------------------------
 @app.get("/api/mspo-certified-entities")
 def get_mspo_certified_entities():
     print("🔍 Fetching MSPO certified entities...")

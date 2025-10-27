@@ -18,6 +18,7 @@ import { CompanyEarnings } from "@/components/company-earnings"
 import { CompanyFinancials } from "@/components/company-financials"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Badge } from "@/components/ui/badge";
 import { Globe } from "lucide-react"
 
 interface CompanyData {
@@ -26,6 +27,7 @@ interface CompanyData {
     company_board: string
     company_description: string
     company_website: string
+    company_rolename: string
 }
 
 export function CompanyProfile() {
@@ -51,6 +53,7 @@ export function CompanyProfile() {
             /> <AvatarFallback>{selectedCompany}</AvatarFallback> </Avatar>
 
             <div>
+                {/* Company Name */}
                 <CardTitle className="text-4xl font-bold text-primary">
                     {companyData ? (
                         companyData.company_long_name
@@ -59,32 +62,61 @@ export function CompanyProfile() {
                     )}
                 </CardTitle>
 
+                {/* Company Board + Stock Code */}
                 <CardDescription className="text-muted-foreground text-base">
                     {companyData ? (
                         companyData.company_board
                     ) : (
                         <Skeleton className="h-4 w-32 rounded-md" />
+                    )}{" "}
+                    |{" "}
+                    {companyData?.company_stock_code ? (
+                        `${selectedCompany} | KLSE: ${companyData.company_stock_code}`
+                    ) : (
+                        <Skeleton className="h-4 w-24 rounded-md inline-block" />
                     )}
-                    <div className="font-small">
-                        {companyData?.company_stock_code ? (
-                            `${selectedCompany} (KLSE: ${companyData.company_stock_code})`
-                        ) : (
-                            <Skeleton className="h-4 w-24 rounded-md inline-block" />
-                        )}
-                    </div>
                 </CardDescription>
 
+                {/* Role Badges */}
+                {companyData?.company_rolename ? (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                        {companyData.company_rolename.split(",").map((role: string, i: number) => {
+                            const cleanRole = role.trim().toLowerCase();
+
+                            // Assign color by role type
+                            let badgeClass = "bg-muted text-foreground"; // default
+                            if (cleanRole.includes("planter")) badgeClass = "bg-green-500/20 text-green-600 dark:text-green-400";
+                            else if (cleanRole.includes("miller")) badgeClass = "bg-amber-500/20 text-amber-600 dark:text-amber-400";
+                            else if (cleanRole.includes("refiner")) badgeClass = "bg-blue-500/20 text-blue-600 dark:text-blue-400";
+                            else if (cleanRole.includes("trader")) badgeClass = "bg-purple-500/20 text-purple-600 dark:text-purple-400";
+
+                            return (
+                                <Badge
+                                    key={i}
+                                    variant="secondary"
+                                    className={`text-xs px-2 py-1 font-medium ${badgeClass}`}
+                                >
+                                    {role.trim()}
+                                </Badge>
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <Skeleton className="h-4 w-40 rounded-md mt-3" />
+                )}
+
+                {/* Website */}
                 {companyData?.company_website ? (
                     <a
                         href={companyData.company_website}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 mt-1 text-sm text-blue-400 hover:underline"
+                        className="flex items-center gap-1 mt-2 text-sm text-blue-400 hover:underline"
                     >
                         <Globe className="h-4 w-4" /> {companyData.company_website}
                     </a>
                 ) : (
-                    <Skeleton className="h-4 w-40 rounded-md mt-1" />
+                    <Skeleton className="h-4 w-40 rounded-md mt-2" />
                 )}
             </div>
         </div>
@@ -103,9 +135,12 @@ export function CompanyProfile() {
                 {companyData?.company_description || "Loading company details..."}
             </p>
 
-            <h2 className="text-2xl font-semibold text-foreground">
+            <h2 className="text-2xl font-semibold text-foreground mt-2 mb-0.5">
                 Company Figures
             </h2>
+            <p className="text-stone-800 dark:text-stone-400 text-sm mb-2">
+                Company monthly and yearly statistics as reported to Bursa Malaysia.
+            </p>
             {/* Row 1: Share Price | Production */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 {companyData ? (
@@ -137,8 +172,14 @@ export function CompanyProfile() {
             {/* Row 3: Earnings | Sankey toggle */}
             <div className="grid grid-cols-1 gap-4 text-sm">
                 <div className="flex justify-between items-center">
-                    <h3 className="text-2xl font-semibold">Company Financials</h3>
-
+                    <div>
+                        <h2 className="text-2xl font-semibold text-foreground mt-2 mb-0.5">
+                            Company Financials
+                        </h2>
+                        <p className="text-stone-800 dark:text-stone-400 text-sm mb-2">
+                            Company quarterly earnings report as reported to Bursa Malaysia.
+                        </p>
+                    </div>
                     <ToggleGroup
                         type="single"
                         value={activeView}
