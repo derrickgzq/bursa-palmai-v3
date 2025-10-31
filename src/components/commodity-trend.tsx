@@ -16,6 +16,7 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart";
+import { ExternalToggleChart } from "@/components/commodity-trend-external-stats";
 import {
     Area,
     AreaChart,
@@ -99,7 +100,7 @@ export function CommodityTrend() {
                 ) : (
                     <IconTrendingDown className="size-4" />
                 )}
-                {rounded}%
+                {rounded}% MoM
             </Badge>
         );
     };
@@ -203,7 +204,7 @@ export function CommodityTrend() {
                         </CardHeader>
                     </Card>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-[1.1fr_1fr] gap-4">
                         {/* Export Card */}
                         <Card className="@container/card">
                             <CardHeader className="flex items-center justify-between">
@@ -420,6 +421,17 @@ export function CommodityTrend() {
                     </Card>
                 </div>
             </div>
+            <div>
+                <h2 className="text-2xl font-semibold tracking-tight mb-1">
+                    External Statistics
+                </h2>
+                <p className="text-stone-800 dark:text-stone-400 text-sm mb-4">
+                    Navigate Soybean (a Palm Oil substitute), diesel and Shanghai Container Freight Prices.
+                </p>
+            </div>
+            <ExternalToggleChart />
+
+
         </section>
     );
 }

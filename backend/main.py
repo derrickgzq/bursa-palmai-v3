@@ -34,6 +34,7 @@ DATA_PATH = os.path.join(BASE_DIR, "..", "src", "data", "weather_station_base.cs
 WIND_PATH = os.path.join(BASE_DIR, "..", "src", "data", "MYS_wind-speed_10m.tif")
 WEATHER_FORECAST_API_URL = "https://api.data.gov.my/weather/forecast"
 EARTHQUAKE_API_URL = "https://api.data.gov.my/weather/warning/earthquake/"
+DIESEL_API_URL = "https://api.data.gov.my/data-catalogue?id=fuelprice&limit=30"
 
 pd.set_option('future.no_silent_downcasting', True)
 
@@ -556,3 +557,27 @@ def get_mspo_certified_entities():
     result = mspo_forecast.to_dict(orient="records")
     print(f"✅ Returned {len(result)} plantation records.")
     return {"data": result}
+
+@app.get("/api/container-freight-index")
+def get_container_freight_index():
+    six_months_ago = (datetime.now() - timedelta(days=180)).strftime("%Y-%m-%d")
+    
+    conn = sqlite3.connect(DB_PATH)
+    query = """
+        SELECT date, category, value
+        FROM containerized_freight_index
+        WHERE date >= ?
+        ORDER BY date ASC
+    """
+    df = pd.read_sql_query(query, conn, params=(six_months_ago,))
+    conn.close()
+    return df.to_dict(orient="records")
+
+@app.get("/api/diesel-prices")
+def get_diesel_prices():
+    response = requests.get(DIESEL_API_URL)
+    data = response.json()
+    
+    data.sort(key=lambda x: x["date"])
+
+    return data
