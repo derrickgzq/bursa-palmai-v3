@@ -266,7 +266,16 @@ export function CommodityTrend() {
                                                 data={rawChartData}
                                                 margin={{ left: 12, right: 12 }}
                                             >
-                                                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                                                <ChartTooltip
+                                                    cursor={false}
+                                                    content={
+                                                        <ChartTooltipContent
+                                                            labelFormatter={(value, payload) =>
+                                                                payload && payload[0] ? payload[0].payload.date : value
+                                                            }
+                                                        />
+                                                    }
+                                                />
                                                 <defs>
                                                     <linearGradient id="fillFreshFruitBunches" x1="0" y1="0" x2="0" y2="1">
                                                         <stop offset="5%" stopColor={color} stopOpacity={0.8} />
@@ -314,7 +323,16 @@ export function CommodityTrend() {
                                                 data={rawChartData}
                                                 margin={{ left: 12, right: 12 }}
                                             >
-                                                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                                                <ChartTooltip
+                                                    cursor={false}
+                                                    content={
+                                                        <ChartTooltipContent
+                                                            labelFormatter={(value, payload) =>
+                                                                payload && payload[0] ? payload[0].payload.date : value
+                                                            }
+                                                        />
+                                                    }
+                                                />
                                                 <defs>
                                                     <linearGradient id="fillPalmKernel" x1="0" y1="0" x2="0" y2="1">
                                                         <stop offset="5%" stopColor={color} stopOpacity={0.8} />
@@ -362,7 +380,16 @@ export function CommodityTrend() {
                                                 data={rawChartData}
                                                 margin={{ left: 12, right: 12 }}
                                             >
-                                                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                                                <ChartTooltip
+                                                    cursor={false}
+                                                    content={
+                                                        <ChartTooltipContent
+                                                            labelFormatter={(value, payload) =>
+                                                                payload && payload[0] ? payload[0].payload.date : value
+                                                            }
+                                                        />
+                                                    }
+                                                />
                                                 <defs>
                                                     <linearGradient id="fillLocalCrudePalmOil" x1="0" y1="0" x2="0" y2="1">
                                                         <stop offset="5%" stopColor={color} stopOpacity={0.8} />

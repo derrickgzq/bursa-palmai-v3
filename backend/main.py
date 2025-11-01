@@ -54,11 +54,11 @@ def get_news():
         text = re.sub(r'(?i)\bpalmoil\b', 'palm oil', text)
 
         # Insert a space if words are glued: e.g. "palmOil" -> "palm Oil"
-        text = re.sub(r'(?i)(palm)([A-Z])', r'palm \2', text)
-        text = re.sub(r'(?i)(oil)([A-Z])', r'oil \2', text)
+        text = re.sub(r'(?i)(palm)([A-Z])', r' palm \2', text)
+        text = re.sub(r'(?i)(oil)([A-Z])', r' oil \2', text)
 
         # Fix missing spaces like "...palmoilexports" -> "...palm oil exports"
-        text = re.sub(r'(?i)(palm)\s?(oil)', r'palm oil', text)
+        text = re.sub(r'(?i)(palm)\s?(oil)', r' palm oil', text)
 
         # Capitalize if "palm" starts a sentence
         text = re.sub(r'(^|\.\s+)(palm)', lambda m: m.group(1) + "Palm", text, flags=re.IGNORECASE)
@@ -120,9 +120,8 @@ def get_news():
                     'link': link,
                     'description': description,
                     'image_url': image_url,
-                    'published': publish_date
-                    #,
-                    #'sentiment': sentiment,
+                    'published': publish_date,
+                    'sentiment': "Positive"
                     #'score': round(score, 4)
                 })
 
@@ -292,7 +291,7 @@ def get_mpob_statistics():
 
 @app.get("/api/raw-material-prices")
 def get_raw_material_prices():
-    six_months_ago = (datetime.now() - timedelta(days=180)).strftime("%Y-%m-%d")
+    six_months_ago = (datetime.now() - timedelta(days=720)).strftime("%Y-%m-%d")
     
     conn = sqlite3.connect(DB_PATH)
     query = """

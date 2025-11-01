@@ -142,6 +142,13 @@ export default function Page() {
                 <p>Trade network visualization and import/export analysis here.</p>
               </div>
             )}
+
+            {activeTab === "Documentation" && (
+              <div className="p-4 border rounded-md">
+                <h1 className="text-lg font-semibold mb-2">Documentation</h1>
+                <p>API documentation and usage examples here.</p>
+              </div>
+            )}
           </div>
         </SidebarInset>
       </SidebarProvider>
