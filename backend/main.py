@@ -7,7 +7,9 @@ from typing import Dict, Any, List
 from geopy.distance import geodesic
 from rasterio import open as rio_open
 from rasterio.warp import transform
+from fastapi.responses import JSONResponse
 import yfinance as yf
+import json
 import sqlite3
 import os
 import pandas as pd
@@ -427,6 +429,7 @@ def get_mspo_certified_entities():
             "parent_company" AS parent_company,
             "entity" AS entity,
             "mpobl_license_number" AS mpobl_license_number,
+            "audit_scope" AS audit_scope,
             "category" AS category,
             "latitude" AS latitude,
             "longitude" AS longitude,
@@ -436,7 +439,8 @@ def get_mspo_certified_entities():
         WHERE status = 'ACTIVE'
             AND category = 'ESTATE'
             AND (state = "Pahang"
-                 OR state = "Kedah")
+                 OR state = "Kedah"
+                 OR state = "Perak")
             AND "latitude" IS NOT NULL
             AND "longitude" IS NOT NULL
     """, conn)
@@ -580,3 +584,20 @@ def get_diesel_prices():
     data.sort(key=lambda x: x["date"])
 
     return data
+
+@app.get("/api/trade-data")
+async def get_trade_data():
+    conn = sqlite3.connect(DB_PATH)
+    query = """
+            SELECT reporterISO, partnerISO, reporterDesc, refMonth, cmdCode, fobvalue
+            FROM trade_data
+            WHERE refMonth = '2024'
+            AND fobvalue >= 10000000
+            AND reporterISO not like 'WORLD'
+            AND partnerISO not like 'WORLD'
+            """
+    dff = pd.read_sql(query, conn)
+    data = dff.to_dict(orient="records")
+    conn.close()
+    
+    return JSONResponse(content=data)

@@ -19,6 +19,7 @@ interface Plantation {
   parent_company: string;
   entity: string;
   mpobl_license_number: string;
+  audit_scope: string;
   latitude: number;
   longitude: number;
   certified_area: number;
@@ -186,6 +187,9 @@ export function GeographyMap() {
 
               <h2 className="text-sm font-semibold text-muted-foreground mt-2">Parent Company</h2>
               <p className="text-base font-medium">{selectedCompanyForDate.parent_company}</p>
+
+              <h2 className="text-sm font-semibold text-muted-foreground mt-2">Audit Scope</h2>
+              <p className="text-base font-medium">{selectedCompanyForDate.audit_scope}</p>
             </div>
 
             {/* Certified vs Planted Area */}

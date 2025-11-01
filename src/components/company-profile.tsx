@@ -52,10 +52,11 @@ export function CompanyProfile() {
                     {/* Left: company logo & info */}
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                         <Avatar className="h-28 w-28 border border-zinc-600">
-                            <AvatarImage
-                                src={`src/assets/images/${selectedCompany.toLowerCase()}_logo.png`}
-                                alt={`${selectedCompany} Logo`}
-                            /> <AvatarFallback>{selectedCompany}</AvatarFallback> </Avatar>
+                            <AvatarImage src={`src/assets/images/${selectedCompany.toLowerCase()}_logo.png`} alt={`${selectedCompany} Logo`} />
+                            <AvatarFallback>
+                                {selectedCompany}
+                            </AvatarFallback>
+                        </Avatar>
 
                         <div>
                             {/* Company Name */}
@@ -209,6 +210,18 @@ export function CompanyProfile() {
                             ) : (
                                 <Skeleton className="h-full w-full rounded-md" />
                             )}
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 gap-4 text-sm">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h2 className="text-2xl font-semibold text-foreground mt-2 mb-0.5">
+                                    In-depth Analysis
+                                </h2>
+                                <p className="text-stone-800 dark:text-stone-400 text-sm mb-2">
+                                    Company analysis and insights.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </CardContent>

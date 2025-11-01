@@ -121,10 +121,10 @@ export function ExternalToggleChart() {
     freight: { label: "Freight Index", color: "var(--chart-2)" },
     fertilizer: { label: "Fertilizer (RM/tonne)", color: "var(--chart-3)" },
 
-    "dap-fertilizer": { label: "DAP", color: "hsl(220,70%,50%)" },
-    "potassium-chloride": { label: "KCl", color: "hsl(160,70%,50%)" },
+    "dap-fertilizer": { label: "DAP Fertilizer", color: "hsl(220,70%,50%)" },
+    "potassium-chloride": { label: "Potassium Chloride", color: "hsl(160,70%,50%)" },
     "rock-phosphate": { label: "Rock Phosphate", color: "hsl(40,70%,50%)" },
-    "triple-superphosphate": { label: "TSP", color: "hsl(280,70%,50%)" },
+    "triple-superphosphate": { label: "Triple Superphosphate", color: "hsl(280,70%,50%)" },
     urea: { label: "Urea", color: "hsl(10,70%,50%)" },
   } satisfies ChartConfig;
 
@@ -198,10 +198,7 @@ export function ExternalToggleChart() {
             Loading…
           </p>
         ) : (
-          <ChartContainer
-            config={chartConfig}
-            className="aspect-auto h-[380px] w-full"
-          >
+          <ChartContainer config={chartConfig} className="aspect-auto h-[380px] w-full">
             {/* ---------------------------------------------------------- */}
             {/*  Diesel & Freight → still use Bar (single series)          */}
             {/* ---------------------------------------------------------- */}
@@ -346,13 +343,7 @@ export function ExternalToggleChart() {
                     />
                   }
                 />
-                <Legend
-                  verticalAlign="top"
-                  height={36}
-                  formatter={(value) =>
-                    chartConfig[value as keyof typeof chartConfig]?.label ?? value
-                  }
-                />
+                <Legend />
 
                 {/* Stacked areas – same order as legend */}
                 {[

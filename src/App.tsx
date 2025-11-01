@@ -24,6 +24,7 @@ import { NewsCards } from "@/components/news-card"
 import { CompanyProfile } from "@/components/company-profile"
 import { GeographyMap } from "@/components/geography-map";
 import { CommodityTrend } from "@/components/commodity-trend";
+import { GlobalTradeNetwork } from "@/components/global-trade-network";
 import "leaflet/dist/leaflet.css";
 import { useState } from "react"
 
@@ -137,10 +138,7 @@ export default function Page() {
             )}
 
             {activeTab === "Global Trades" && (
-              <div className="p-4 border rounded-md">
-                <h1 className="text-lg font-semibold mb-2">Global Trades</h1>
-                <p>Trade network visualization and import/export analysis here.</p>
-              </div>
+              <GlobalTradeNetwork />
             )}
 
             {activeTab === "Documentation" && (
